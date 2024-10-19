@@ -35,10 +35,10 @@ const TablesPage: React.FC = () => {
         setTables(data);
     }, []);
 
-    const handleCellEdit = (tableId: string, rowIndex: number, cellIndex: number, newValue: string) => {
+    const handleCellEdit = (tableId: string, row_id: number, cellIndex: number, newValue: string) => {
         const updatedTables = tables.map((table) => {
             if (table.id === tableId) {
-                table.rows[rowIndex][cellIndex].value = newValue;
+                table.rows[row_id][cellIndex].value = newValue;
             }
             return table;
         });
@@ -62,10 +62,10 @@ const TablesPage: React.FC = () => {
         saveToLocalStorage(updatedTables);
     };
 
-    const handleDeleteRow = (tableId: string, rowIndex: number) => {
+    const handleDeleteRow = (tableId: string, row_id: number) => {
         const updatedTables = tables.map((table) => {
             if (table.id === tableId) {
-                table.rows.splice(rowIndex, 1);
+                table.rows.splice(row_id, 1);
             }
             return table;
         });
@@ -73,10 +73,10 @@ const TablesPage: React.FC = () => {
         saveToLocalStorage(updatedTables);
     };
 
-    const handleVote = (tableId: string, rowIndex: number, cellIndex: number, upVote: boolean) => {
+    const handleVote = (tableId: string, row_id: number, cellIndex: number, upVote: boolean) => {
         const updatedTables = tables.map((table) => {
             if (table.id === tableId) {
-                table.rows[rowIndex][cellIndex].votes += upVote ? 1 : -1;
+                table.rows[row_id][cellIndex].votes += upVote ? 1 : -1;
             }
             return table;
         });
@@ -96,11 +96,11 @@ const TablesPage: React.FC = () => {
         saveToLocalStorage(updatedTables); // Save to localStorage
     };
 
-    const handleDeleteColumn = (tableId: string, colIndex: number) => {
+    const handleDeleteColumn = (tableId: string, col_id: number) => {
         const updatedTables = tables.map((table) => {
             if (table.id === tableId) {
-                table.headers.splice(colIndex, 1);
-                table.rows.forEach(row => row.splice(colIndex, 1));
+                table.headers.splice(col_id, 1);
+                table.rows.forEach(row => row.splice(col_id, 1));
             }
             return table;
         });
@@ -143,28 +143,28 @@ const TablesPage: React.FC = () => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {table.rows.map((row, rowIndex) => (
+                                {table.rows.map((row, row_id) => (
                                     <>
-                                        <TableRow key={rowIndex}>
+                                        <TableRow key={row_id}>
                                             {row.map((cell, cellIndex) => (
                                                 <TableCell key={cellIndex}>
                                                     <TextField
                                                         value={cell.value}
-                                                        onChange={(e) => handleCellEdit(table.id, rowIndex, cellIndex, e.target.value)}
+                                                        onChange={(e) => handleCellEdit(table.id, row_id, cellIndex, e.target.value)}
                                                     />
-                                                    <IconButton onClick={() => handleVote(table.id, rowIndex, cellIndex, true)}>
+                                                    <IconButton onClick={() => handleVote(table.id, row_id, cellIndex, true)}>
                                                         <ThumbUp />
                                                     </IconButton>
-                                                    <IconButton onClick={() => handleVote(table.id, rowIndex, cellIndex, false)}>
+                                                    <IconButton onClick={() => handleVote(table.id, row_id, cellIndex, false)}>
                                                         <ThumbDown />
                                                     </IconButton>
                                                 </TableCell>
                                             ))}
                                             <TableCell>
-                                                <IconButton onClick={() => handleExpandRow(table.id, rowIndex.toString())}>
-                                                    {expandedRows[rowIndex] ? <ExpandLess /> : <ExpandMore />}
+                                                <IconButton onClick={() => handleExpandRow(table.id, row_id.toString())}>
+                                                    {expandedRows[row_id] ? <ExpandLess /> : <ExpandMore />}
                                                 </IconButton>
-                                                <IconButton onClick={() => handleDeleteRow(table.id, rowIndex)}>
+                                                <IconButton onClick={() => handleDeleteRow(table.id, row_id)}>
                                                     <Delete />
                                                 </IconButton>
                                             </TableCell>
@@ -172,7 +172,7 @@ const TablesPage: React.FC = () => {
 
                                         <TableRow>
                                             <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-                                                <Collapse in={expandedRows[rowIndex]} timeout="auto" unmountOnExit>
+                                                <Collapse in={expandedRows[row_id]} timeout="auto" unmountOnExit>
                                                     <Table size="small">
                                                         <TableHead>
                                                             <TableRow>
