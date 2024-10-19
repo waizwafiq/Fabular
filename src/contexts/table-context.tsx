@@ -49,7 +49,17 @@ const TableProvider: React.FC<React.PropsWithChildren<{}>> = (props) => {
 
         setTables((prevTables) => [
             ...prevTables,
-            { id: uuidv4(), name: randomName, data: [['']] }
+            {
+                id: uuidv4(),
+                name: randomName,
+                data: [
+                    ['', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', ''],
+                ]
+            }
         ]);
     };
 
