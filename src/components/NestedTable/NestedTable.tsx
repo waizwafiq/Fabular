@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { TableContainer, Table, TableBody, TableRow, TableCell, Button, TextField, Paper, IconButton } from '@mui/material';
+import React from 'react';
+import { TableContainer, Table, TableBody, TableRow, TableCell, TableHead, Button, TextField, Paper, IconButton } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import { TableContext } from '../../contexts/table-context';
 import styles from './NestedTable.module.scss';
@@ -8,6 +8,21 @@ interface NestedTableProps {
     id: string;
     data: string[][];
 }
+
+const generateColumnLabels = (numCols: number): string[] => {
+    const labels: string[] = [];
+    let label = '';
+    for (let i = 0; i < numCols; i++) {
+        let colIndex = i;
+        label = '';
+        while (colIndex >= 0) {
+            label = String.fromCharCode((colIndex % 26) + 65) + label;
+            colIndex = Math.floor(colIndex / 26) - 1;
+        }
+        labels.push(label);
+    }
+    return labels;
+};
 
 const NestedTable: React.FC<NestedTableProps> = ({ id, data }) => {
     const tableCtx = React.useContext(TableContext);
@@ -21,19 +36,8 @@ const NestedTable: React.FC<NestedTableProps> = ({ id, data }) => {
         );
     };
 
-    useEffect(() => {
-        const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.key === 'Backspace' || event.key === 'Delete') {
-                tableCtx.updateSelectedCells('');
-            }
-        };
-
-        window.addEventListener('keydown', handleKeyDown);
-
-        return () => {
-            window.removeEventListener('keydown', handleKeyDown);
-        };
-    }, [tableCtx]);
+    // Generate column labels
+    const columnLabels = generateColumnLabels(data[0]?.length || 0);
 
     return (
         <div style={{ margin: '20px' }}>
@@ -45,9 +49,25 @@ const NestedTable: React.FC<NestedTableProps> = ({ id, data }) => {
                 <>
                     <TableContainer component={Paper} style={{ marginTop: '20px' }}>
                         <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell /> {/* Empty cell for row numbers */}
+                                    {columnLabels.map((label, colIndex) => (
+                                        <TableCell
+                                            key={`col-header-${colIndex}`}
+                                            className={hoveredCol === colIndex ? styles['highlight-col'] : ''}
+                                            style={{ textAlign: 'center' }}
+                                        >
+                                            {label}
+                                        </TableCell>
+                                    ))}
+                                    <TableCell /> {/* Empty cell for delete column */}
+                                </TableRow>
+                            </TableHead>
                             <TableBody>
                                 {/* Column Delete Row */}
                                 <TableRow>
+                                    <TableCell /> {/* Empty cell for row numbers */}
                                     {data[0]?.map((_, colIndex) => (
                                         <TableCell
                                             key={`delete-col-${colIndex}`}
@@ -73,6 +93,13 @@ const NestedTable: React.FC<NestedTableProps> = ({ id, data }) => {
                                         key={rowIndex}
                                         className={hoveredRow === rowIndex ? styles['highlight-row'] : ''}
                                     >
+                                        {/* Row number */}
+                                        <TableCell
+                                            style={{ textAlign: 'center' }}
+                                            className={styles['row-number']}
+                                        >
+                                            {rowIndex + 1}
+                                        </TableCell>
                                         {row.map((cell, colIndex) => (
                                             <TableCell
                                                 key={colIndex}
