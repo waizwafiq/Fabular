@@ -1,15 +1,17 @@
 import React from 'react';
 import Table from '../models/Table';
+import { v4 as uuidv4 } from 'uuid';
+import { uniqueNamesGenerator, adjectives, animals } from 'unique-names-generator';
 
 interface TableContextObj {
     tables: Table[];
     addTable: () => void;
     deleteTable: (id: string) => void;
-    updateCell: (tableId: string, rowIndex: number, colIndex: number, value: string) => void;
-    addRow: (tableId: string) => void;
-    deleteRow: (tableId: string, rowIndex: number) => void;
-    addColumn: (tableId: string) => void;
-    deleteColumn: (tableId: string, colIndex: number) => void;
+    updateCell: (table_id: string, row_id: number, col_id: number, value: string) => void;
+    addRow: (table_id: string) => void;
+    deleteRow: (table_id: string, row_id: number) => void;
+    addColumn: (table_id: string) => void;
+    deleteColumn: (table_id: string, col_id: number) => void;
 }
 
 const TableContext = React.createContext<TableContextObj>({
@@ -26,26 +28,33 @@ const TableContext = React.createContext<TableContextObj>({
 const TableProvider: React.FC<React.PropsWithChildren<{}>> = (props) => {
     const [tables, setTables] = React.useState<Table[]>([]);
 
-    const addTable = () => {
+
+    const addTableHandler = () => {
+        const randomName = uniqueNamesGenerator({
+            dictionaries: [adjectives, animals],
+            separator: '_',
+            length: 2,
+        });
+
         setTables((prevTables) => [
             ...prevTables,
-            { id: Math.random().toString(), data: [['']] }
+            { id: uuidv4(), name: randomName, data: [['']] }
         ]);
     };
 
-    const deleteTable = (id: string) => {
+    const deleteTableHandler = (id: string) => {
         setTables((prevTables) => prevTables.filter((table) => table.id !== id));
     };
 
-    const updateCell = (tableId: string, rowIndex: number, colIndex: number, value: string) => {
+    const updateCellHandler = (table_id: string, row_id: number, col_id: number, value: string) => {
         setTables((prevTables) =>
             prevTables.map((table) =>
-                table.id === tableId
+                table.id === table_id
                     ? {
                         ...table,
                         data: table.data.map((row, rIdx) =>
-                            rIdx === rowIndex
-                                ? row.map((cell, cIdx) => (cIdx === colIndex ? value : cell))
+                            rIdx === row_id
+                                ? row.map((cell, cIdx) => (cIdx === col_id ? value : cell))
                                 : row
                         ),
                     }
@@ -54,41 +63,41 @@ const TableProvider: React.FC<React.PropsWithChildren<{}>> = (props) => {
         );
     };
 
-    const addRow = (tableId: string) => {
+    const addRowHandler = (table_id: string) => {
         setTables((prevTables) =>
             prevTables.map((table) =>
-                table.id === tableId
+                table.id === table_id
                     ? { ...table, data: [...table.data, new Array(table.data[0].length).fill('')] }
                     : table
             )
         );
     };
 
-    const deleteRow = (tableId: string, rowIndex: number) => {
+    const deleteRowHandler = (table_id: string, row_id: number) => {
         setTables((prevTables) =>
             prevTables.map((table) =>
-                table.id === tableId
-                    ? { ...table, data: table.data.filter((_, rIdx) => rIdx !== rowIndex) }
+                table.id === table_id
+                    ? { ...table, data: table.data.filter((_, rIdx) => rIdx !== row_id) }
                     : table
             )
         );
     };
 
-    const addColumn = (tableId: string) => {
+    const addColumnHandler = (table_id: string) => {
         setTables((prevTables) =>
             prevTables.map((table) =>
-                table.id === tableId
+                table.id === table_id
                     ? { ...table, data: table.data.map((row) => [...row, '']) }
                     : table
             )
         );
     };
 
-    const deleteColumn = (tableId: string, colIndex: number) => {
+    const deleteColumnHandler = (table_id: string, col_id: number) => {
         setTables((prevTables) =>
             prevTables.map((table) =>
-                table.id === tableId
-                    ? { ...table, data: table.data.map((row) => row.filter((_, cIdx) => cIdx !== colIndex)) }
+                table.id === table_id
+                    ? { ...table, data: table.data.map((row) => row.filter((_, cIdx) => cIdx !== col_id)) }
                     : table
             )
         );
@@ -96,13 +105,13 @@ const TableProvider: React.FC<React.PropsWithChildren<{}>> = (props) => {
 
     const contextValue: TableContextObj = {
         tables: tables,
-        addTable: addTable,
-        deleteTable: deleteTable,
-        updateCell: updateCell,
-        addRow: addRow,
-        deleteRow: deleteRow,
-        addColumn: addColumn,
-        deleteColumn: deleteColumn,
+        addTable: addTableHandler,
+        deleteTable: deleteTableHandler,
+        updateCell: updateCellHandler,
+        addRow: addRowHandler,
+        deleteRow: deleteRowHandler,
+        addColumn: addColumnHandler,
+        deleteColumn: deleteColumnHandler,
     };
 
     return <TableContext.Provider value={contextValue}>{props.children}</TableContext.Provider>;
