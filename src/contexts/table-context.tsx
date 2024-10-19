@@ -12,6 +12,7 @@ interface TableContextObj {
     deleteRow: (table_id: string, row_id: number) => void;
     addColumn: (table_id: string) => void;
     deleteColumn: (table_id: string, col_id: number) => void;
+    updateTableName: (table_id: string, newName: string) => void;
 }
 
 const TableContext = React.createContext<TableContextObj>({
@@ -23,6 +24,7 @@ const TableContext = React.createContext<TableContextObj>({
     deleteRow: () => { },
     addColumn: () => { },
     deleteColumn: () => { },
+    updateTableName: () => { },
 });
 
 const TableProvider: React.FC<React.PropsWithChildren<{}>> = (props) => {
@@ -32,8 +34,9 @@ const TableProvider: React.FC<React.PropsWithChildren<{}>> = (props) => {
     const addTableHandler = () => {
         const randomName = uniqueNamesGenerator({
             dictionaries: [adjectives, animals],
-            separator: '_',
+            separator: ' ',
             length: 2,
+            style: 'capital',
         });
 
         setTables((prevTables) => [
@@ -103,6 +106,14 @@ const TableProvider: React.FC<React.PropsWithChildren<{}>> = (props) => {
         );
     };
 
+    const updateTableNameHandler = (table_id: string, newName: string) => {
+        setTables((prevTables) =>
+            prevTables.map((table) =>
+                table.id === table_id ? { ...table, name: newName } : table
+            )
+        );
+    };
+
     const contextValue: TableContextObj = {
         tables: tables,
         addTable: addTableHandler,
@@ -112,6 +123,7 @@ const TableProvider: React.FC<React.PropsWithChildren<{}>> = (props) => {
         deleteRow: deleteRowHandler,
         addColumn: addColumnHandler,
         deleteColumn: deleteColumnHandler,
+        updateTableName: updateTableNameHandler,
     };
 
     return <TableContext.Provider value={contextValue}>{props.children}</TableContext.Provider>;
