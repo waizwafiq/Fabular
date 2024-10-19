@@ -14,15 +14,19 @@
     "@emotion/styled": "^11.13.0",
     "@mui/icons-material": "^6.1.4",
     "@mui/material": "^6.1.4",
+    "@tabler/icons": "^3.19.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.27.0",
-    "scss": "^0.2.4"
+    "scss": "^0.2.4",
+    "unique-names-generator": "^4.7.1",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.11.1",
     "@types/react": "^18.3.10",
     "@types/react-dom": "^18.3.0",
+    "@types/uuid": "^10.0.0",
     "@vitejs/plugin-react-swc": "^3.5.0",
     "eslint": "^9.11.1",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
