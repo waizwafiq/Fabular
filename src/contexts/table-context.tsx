@@ -3,6 +3,8 @@ import Table from '../models/Table';
 import { v4 as uuidv4 } from 'uuid';
 import { uniqueNamesGenerator, adjectives, animals } from 'unique-names-generator';
 
+import { Alert } from '@mui/material';
+
 interface TableContextObj {
     tables: Table[];
     addTable: () => void;
@@ -29,7 +31,7 @@ const TableContext = React.createContext<TableContextObj>({
 
 const TableProvider: React.FC<React.PropsWithChildren<{}>> = (props) => {
     const [tables, setTables] = React.useState<Table[]>([]);
-
+    const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
     const addTableHandler = () => {
         const randomName = uniqueNamesGenerator({
@@ -78,11 +80,16 @@ const TableProvider: React.FC<React.PropsWithChildren<{}>> = (props) => {
 
     const deleteRowHandler = (table_id: string, row_id: number) => {
         setTables((prevTables) =>
-            prevTables.map((table) =>
-                table.id === table_id
-                    ? { ...table, data: table.data.filter((_, rIdx) => rIdx !== row_id) }
-                    : table
-            )
+            prevTables.map((table) => {
+                if (table.id === table_id) {
+                    if (table.data.length === 1) {
+                        setErrorMessage('Cannot delete the last row.');
+                        return table;
+                    }
+                    return { ...table, data: table.data.filter((_, rIdx) => rIdx !== row_id) };
+                }
+                return table;
+            })
         );
     };
 
@@ -98,11 +105,16 @@ const TableProvider: React.FC<React.PropsWithChildren<{}>> = (props) => {
 
     const deleteColumnHandler = (table_id: string, col_id: number) => {
         setTables((prevTables) =>
-            prevTables.map((table) =>
-                table.id === table_id
-                    ? { ...table, data: table.data.map((row) => row.filter((_, cIdx) => cIdx !== col_id)) }
-                    : table
-            )
+            prevTables.map((table) => {
+                if (table.id === table_id) {
+                    if (table.data[0].length === 1) {
+                        setErrorMessage('Cannot delete the last column.');
+                        return table;
+                    }
+                    return { ...table, data: table.data.map((row) => row.filter((_, cIdx) => cIdx !== col_id)) };
+                }
+                return table;
+            })
         );
     };
 
@@ -126,7 +138,12 @@ const TableProvider: React.FC<React.PropsWithChildren<{}>> = (props) => {
         updateTableName: updateTableNameHandler,
     };
 
-    return <TableContext.Provider value={contextValue}>{props.children}</TableContext.Provider>;
+    return (
+        <TableContext.Provider value={contextValue}>
+            {errorMessage && <Alert severity="error" style={{ marginBottom: '10px' }}>{errorMessage}</Alert>}
+            {props.children}
+        </TableContext.Provider>
+    );
 };
 
 export { TableContext, TableProvider };
