@@ -2,6 +2,11 @@ $highlight-row-color: rgba(255, 0, 0, 0.1);
 $highlight-col-color: rgba(255, 0, 0, 0.1);
 // $highlight-col-color: rgba(0, 0, 255, 0.1);
 
+.selected {
+    background-color: rgba(173, 216, 230, 0.4);
+}
+
+
 .highlight-row {
     background-color: $highlight-row-color;
 }

@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { TableContainer, Table, TableBody, TableRow, TableCell, Button, TextField, Paper, IconButton } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import { TableContext } from '../../contexts/table-context';
-import styles from './NestedTable.module.scss'; // Import the SCSS file
+import styles from './NestedTable.module.scss';
 
 interface NestedTableProps {
     id: string;
@@ -14,6 +14,26 @@ const NestedTable: React.FC<NestedTableProps> = ({ id, data }) => {
     const [expanded, setExpanded] = React.useState<boolean>(false);
     const [hoveredCol, setHoveredCol] = React.useState<number | null>(null);
     const [hoveredRow, setHoveredRow] = React.useState<number | null>(null);
+
+    const isSelected = (rowIndex: number, colIndex: number) => {
+        return tableCtx.selectedCells.some(
+            (cell) => cell.table_id === id && cell.row_id === rowIndex && cell.col_id === colIndex
+        );
+    };
+
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Backspace' || event.key === 'Delete') {
+                tableCtx.updateSelectedCells('');
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [tableCtx]);
 
     return (
         <div style={{ margin: '20px' }}>
@@ -56,16 +76,24 @@ const NestedTable: React.FC<NestedTableProps> = ({ id, data }) => {
                                         {row.map((cell, colIndex) => (
                                             <TableCell
                                                 key={colIndex}
-                                                className={hoveredCol === colIndex ? styles['highlight-col'] : ''}
+                                                className={
+                                                    `${hoveredCol === colIndex ? styles['highlight-col'] : ''} ${isSelected(rowIndex, colIndex) ? styles['selected'] : ''}`
+                                                }
+                                                onClick={(e) =>
+                                                    tableCtx.selectCell(id, rowIndex, colIndex, e.shiftKey, e.ctrlKey || e.metaKey)
+                                                }
                                             >
                                                 <TextField
                                                     fullWidth
                                                     value={cell}
                                                     onChange={(e) =>
-                                                        tableCtx.updateCell(id, rowIndex, colIndex, e.target.value)
+                                                        isSelected(rowIndex, colIndex)
+                                                            ? tableCtx.updateSelectedCells(e.target.value)
+                                                            : tableCtx.updateCell(id, rowIndex, colIndex, e.target.value)
                                                     }
                                                     variant="outlined"
                                                     size="small"
+                                                    autoComplete="off"
                                                 />
                                             </TableCell>
                                         ))}
@@ -74,8 +102,8 @@ const NestedTable: React.FC<NestedTableProps> = ({ id, data }) => {
                                         >
                                             <IconButton
                                                 color="error"
-                                                onMouseEnter={() => setHoveredRow(rowIndex)} 
-                                                onMouseLeave={() => setHoveredRow(null)} 
+                                                onMouseEnter={() => setHoveredRow(rowIndex)}
+                                                onMouseLeave={() => setHoveredRow(null)}
                                                 onClick={() => tableCtx.deleteRow(id, rowIndex)}
                                             >
                                                 <Delete />
