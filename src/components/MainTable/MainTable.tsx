@@ -1,30 +1,46 @@
 import React from 'react';
-import NestedTable from '../NestedTable/NestedTable';
+import { Paper, Typography, Button, Box, Divider, Grid2 } from '@mui/material';
+import { Delete } from '@mui/icons-material';
 import { TableContext } from '../../contexts/table-context';
-import './MainTable.scss';
+import NestedTable from '../NestedTable/NestedTable';
 
 const MainTable: React.FC = () => {
     const tableCtx = React.useContext(TableContext);
 
     return (
-        <div className="main-table">
-            <h1>Dynamic Nested Tables</h1>
+        <Box sx={{ padding: 4 }}>
+            <Typography variant="h4" gutterBottom>
+                Dynamic Nested Tables
+            </Typography>
+
             {tableCtx.tables.map((table) => (
-                <div className="table-container" key={table.id}>
-                    <h2>Table ID: {table.id}</h2>
+                <Paper key={table.id} sx={{ padding: 2, marginBottom: 4 }} elevation={3}>
+                    <Grid2 container justifyContent="space-between" alignItems="center">
+                        <Typography variant="h6">{table.name}</Typography>
+                        <Button
+                            variant="contained"
+                            color="error"
+                            onClick={() => tableCtx.deleteTable(table.id)}
+                        >
+                            <Delete /> Delete Table
+                        </Button>
+                    </Grid2>
+
+                    <Divider sx={{ marginY: 2 }} />
+
                     <NestedTable id={table.id} data={table.data} />
-                    <button
-                        className="delete-table-btn"
-                        onClick={() => tableCtx.deleteTable(table.id)}
-                    >
-                        Delete Table
-                    </button>
-                </div>
+                </Paper>
             ))}
-            <button className="add-table-btn" onClick={tableCtx.addTable}>
+
+            <Button
+                variant="contained"
+                color="primary"
+                onClick={tableCtx.addTable}
+                sx={{ marginTop: 2 }}
+            >
                 Add New Table
-            </button>
-        </div>
+            </Button>
+        </Box>
     );
 };
 
