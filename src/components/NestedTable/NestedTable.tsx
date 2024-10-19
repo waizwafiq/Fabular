@@ -1,6 +1,7 @@
 import React from 'react';
+import { TableContainer, Table, TableBody, TableRow, TableCell, Button, TextField, Paper, IconButton } from '@mui/material';
+import { Delete } from '@mui/icons-material';
 import { TableContext } from '../../contexts/table-context';
-import './NestedTable.scss';
 
 interface NestedTableProps {
     id: string;
@@ -12,42 +13,52 @@ const NestedTable: React.FC<NestedTableProps> = ({ id, data }) => {
     const [expanded, setExpanded] = React.useState<boolean>(false);
 
     return (
-        <div className="nested-table">
-            <button className="toggle-btn" onClick={() => setExpanded(!expanded)}>
+        <div style={{ margin: '20px' }}>
+            <Button variant="contained" onClick={() => setExpanded(!expanded)}>
                 {expanded ? 'Collapse' : 'Expand'}
-            </button>
+            </Button>
+
             {expanded && (
                 <>
-                    <table>
-                        <tbody>
-                            {data.map((row, rowIndex) => (
-                                <tr key={rowIndex}>
-                                    {row.map((cell, colIndex) => (
-                                        <td key={colIndex}>
-                                            <input
-                                                type="text"
-                                                value={cell}
-                                                onChange={(e) =>
-                                                    tableCtx.updateCell(id, rowIndex, colIndex, e.target.value)
-                                                }
-                                            />
-                                        </td>
-                                    ))}
-                                    <td className='action-btns'>
-                                        <button
-                                            className="delete-btn"
-                                            onClick={() => tableCtx.deleteRow(id, rowIndex)}
-                                        >
-                                            Delete Row
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                    <div className="action-btns">
-                        <button onClick={() => tableCtx.addRow(id)}>Add Row</button>
-                        <button onClick={() => tableCtx.addColumn(id)}>Add Column</button>
+                    <TableContainer component={Paper} style={{ marginTop: '20px' }}>
+                        <Table>
+                            <TableBody>
+                                {data.map((row, rowIndex) => (
+                                    <TableRow key={rowIndex}>
+                                        {row.map((cell, colIndex) => (
+                                            <TableCell key={colIndex}>
+                                                <TextField
+                                                    fullWidth
+                                                    value={cell}
+                                                    onChange={(e) =>
+                                                        tableCtx.updateCell(id, rowIndex, colIndex, e.target.value)
+                                                    }
+                                                    variant="outlined"
+                                                    size="small"
+                                                />
+                                            </TableCell>
+                                        ))}
+                                        <TableCell>
+                                            <IconButton
+                                                color="error"
+                                                onClick={() => tableCtx.deleteRow(id, rowIndex)}
+                                            >
+                                                <Delete />
+                                            </IconButton>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+
+                    <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                        <Button variant="contained" color="primary" onClick={() => tableCtx.addRow(id)}>
+                            Add Row
+                        </Button>
+                        <Button variant="contained" color="primary" onClick={() => tableCtx.addColumn(id)}>
+                            Add Column
+                        </Button>
                     </div>
                 </>
             )}
