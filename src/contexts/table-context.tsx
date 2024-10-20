@@ -7,7 +7,7 @@ import { Alert } from '@mui/material';
 
 interface TableContextObj {
     tables: Table[];
-    addTable: () => void;
+    addTable: (M_rows: number, N_cols: number) => void;
     deleteTable: (id: string) => void;
     updateCell: (table_id: string, row_id: number, col_id: number, value: string) => void;
     addRow: (table_id: string) => void;
@@ -20,6 +20,7 @@ interface TableContextObj {
     selectCell: (table_id: string, row_id: number, col_id: number, isShiftKey: boolean, isCtrlKey: boolean) => void;
     updateSelectedCells: (value: string) => void;
     clearTable: (table_id: string) => void;
+    hasValuesInTable: (table_id: string) => boolean;
 }
 
 const TableContext = React.createContext<TableContextObj>({
@@ -37,13 +38,14 @@ const TableContext = React.createContext<TableContextObj>({
     selectCell: () => { },
     updateSelectedCells: () => { },
     clearTable: () => { },
+    hasValuesInTable: () => false,
 });
 
 const TableProvider: React.FC<React.PropsWithChildren<{}>> = (props) => {
     const [tables, setTables] = React.useState<Table[]>([]);
     const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
-    const addTableHandler = () => {
+    const addTableHandler = (M_rows: number, N_cols: number) => {
         const randomName = uniqueNamesGenerator({
             dictionaries: [adjectives, animals],
             separator: ' ',
@@ -51,19 +53,15 @@ const TableProvider: React.FC<React.PropsWithChildren<{}>> = (props) => {
             style: 'capital',
         });
 
+        const tableData = Array.from({ length: M_rows }, () => Array(N_cols).fill(''));
+
         setTables((prevTables) => [
             ...prevTables,
             {
                 id: uuidv4(),
                 name: randomName,
-                data: [
-                    ['', '', '', '', '', '', ''],
-                    ['', '', '', '', '', '', ''],
-                    ['', '', '', '', '', '', ''],
-                    ['', '', '', '', '', '', ''],
-                    ['', '', '', '', '', '', ''],
-                ]
-            }
+                data: tableData,
+            },
         ]);
     };
 
@@ -209,6 +207,13 @@ const TableProvider: React.FC<React.PropsWithChildren<{}>> = (props) => {
         );
     };
 
+    const hasValuesInTableHandler = (table_id: string): boolean => {
+        const table = tables.find((table) => table.id === table_id);
+        if (!table) return false;
+
+        return table.data.some(row => row.some(cell => cell.trim() !== ''));
+    };
+
     const contextValue: TableContextObj = {
         tables: tables,
         addTable: addTableHandler,
@@ -224,6 +229,7 @@ const TableProvider: React.FC<React.PropsWithChildren<{}>> = (props) => {
         selectCell: selectCellHandler,
         updateSelectedCells: updateSelectedCellsHandler,
         clearTable: clearTableHandler,
+        hasValuesInTable: hasValuesInTableHandler,
     };
 
     return (
