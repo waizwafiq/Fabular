@@ -56,7 +56,7 @@ const NestedTable: React.FC<NestedTableProps> = ({ id, data }) => {
                                         <TableCell
                                             key={`col-header-${colIndex}`}
                                             className={hoveredCol === colIndex ? styles['highlight-col'] : ''}
-                                            style={{ textAlign: 'center' }}
+                                            style={{ textAlign: 'center', fontWeight: 'bold' }}
                                         >
                                             {label}
                                         </TableCell>
