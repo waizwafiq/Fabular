@@ -30,6 +30,10 @@ const MainTable: React.FC = () => {
         }
     };
 
+    const handleClearTable = (table_id: string) => {
+        tableCtx.clearTable(table_id);
+    };
+
     return (
         <Box sx={{ padding: 4 }}>
             <Typography variant="h4" gutterBottom>
@@ -67,9 +71,9 @@ const MainTable: React.FC = () => {
                                         color="primary"
                                         onClick={() => {
                                             if (editTableId === table.id) {
-                                                handleSaveClick(table.id); 
+                                                handleSaveClick(table.id);
                                             } else {
-                                                handleEditClick(table.id, table.name); 
+                                                handleEditClick(table.id, table.name);
                                             }
                                         }}
                                     >
@@ -79,6 +83,16 @@ const MainTable: React.FC = () => {
                             </Grid>
                         </Grid>
                         <Grid item>
+                            {/* Clear Table Button */}
+                            <Button
+                                variant="contained"
+                                color="secondary"
+                                onClick={() => handleClearTable(table.id)}
+                                style={{ marginRight: '8px' }}
+                            >
+                                Clear Table
+                            </Button>
+
                             <Button
                                 variant="contained"
                                 color="error"
@@ -88,6 +102,7 @@ const MainTable: React.FC = () => {
                             </Button>
                         </Grid>
                     </Grid>
+
 
                     <Divider sx={{ marginY: 2 }} />
 
