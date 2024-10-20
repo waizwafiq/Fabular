@@ -16,8 +16,10 @@ interface TableContextObj {
     deleteColumn: (table_id: string, col_id: number) => void;
     updateTableName: (table_id: string, newName: string) => void;
     selectedCells: { table_id: string, row_id: number, col_id: number }[];
+    setSelectedCells: (selectedCells: { table_id: string, row_id: number, col_id: number }[]) => void;
     selectCell: (table_id: string, row_id: number, col_id: number, isShiftKey: boolean, isCtrlKey: boolean) => void;
     updateSelectedCells: (value: string) => void;
+    clearTable: (table_id: string) => void;
 }
 
 const TableContext = React.createContext<TableContextObj>({
@@ -31,8 +33,10 @@ const TableContext = React.createContext<TableContextObj>({
     deleteColumn: () => { },
     updateTableName: () => { },
     selectedCells: [],
+    setSelectedCells: () => { },
     selectCell: () => { },
     updateSelectedCells: () => { },
+    clearTable: () => { },
 });
 
 const TableProvider: React.FC<React.PropsWithChildren<{}>> = (props) => {
@@ -192,6 +196,19 @@ const TableProvider: React.FC<React.PropsWithChildren<{}>> = (props) => {
         setSelectedCells([]);
     };
 
+    const clearTableHandler = (table_id: string) => {
+        setTables((prevTables) =>
+            prevTables.map((table) =>
+                table.id === table_id
+                    ? {
+                        ...table,
+                        data: table.data.map(row => row.map(() => ''))
+                    }
+                    : table
+            )
+        );
+    };
+
     const contextValue: TableContextObj = {
         tables: tables,
         addTable: addTableHandler,
@@ -203,8 +220,10 @@ const TableProvider: React.FC<React.PropsWithChildren<{}>> = (props) => {
         deleteColumn: deleteColumnHandler,
         updateTableName: updateTableNameHandler,
         selectedCells,
+        setSelectedCells,
         selectCell: selectCellHandler,
         updateSelectedCells: updateSelectedCellsHandler,
+        clearTable: clearTableHandler,
     };
 
     return (
