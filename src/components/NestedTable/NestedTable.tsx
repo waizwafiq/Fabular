@@ -164,15 +164,6 @@ const NestedTable: React.FC<NestedTableProps> = ({ id, data }) => {
                         </TableBody>
                     </Table>
                 </TableContainer>
-
-                <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '20px' }}>
-                    <IconButton
-                        color="primary"
-                        onClick={() => tableCtx.addRow(id)}
-                    >
-                        +
-                    </IconButton>
-                </div>
             </>
         </div>
     );
