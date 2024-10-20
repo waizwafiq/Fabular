@@ -180,9 +180,9 @@ const TableProvider: React.FC<React.PropsWithChildren<{}>> = (props) => {
                 selectedCells.some((cell) => cell.table_id === table.id)
                     ? {
                         ...table,
-                        data: table.data.map((row, rowIndex) =>
-                            row.map((cell, colIndex) =>
-                                selectedCells.some((selected) => selected.table_id === table.id && selected.row_id === rowIndex && selected.col_id === colIndex)
+                        data: table.data.map((row, row_id) =>
+                            row.map((cell, col_id) =>
+                                selectedCells.some((selected) => selected.table_id === table.id && selected.row_id === row_id && selected.col_id === col_id)
                                     ? value
                                     : cell
                             )

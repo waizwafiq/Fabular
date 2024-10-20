@@ -23,11 +23,11 @@ const generateColumnLabels = (numCols: number): string[] => {
     const labels: string[] = [];
     let label = '';
     for (let i = 0; i < numCols; i++) {
-        let colIndex = i;
+        let col_id = i;
         label = '';
-        while (colIndex >= 0) {
-            label = String.fromCharCode((colIndex % 26) + 65) + label;
-            colIndex = Math.floor(colIndex / 26) - 1;
+        while (col_id >= 0) {
+            label = String.fromCharCode((col_id % 26) + 65) + label;
+            col_id = Math.floor(col_id / 26) - 1;
         }
         labels.push(label);
     }
@@ -39,21 +39,21 @@ const NestedTable: React.FC<NestedTableProps> = ({ id, data }) => {
     const [highlightCol, setHighlightCol] = React.useState<number | null>(null);
     const [highlightRow, setHighlightRow] = React.useState<number | null>(null);
 
-    const isSelected = (rowIndex: number, colIndex: number) => {
+    const isSelected = (row_id: number, col_id: number) => {
         return tableCtx.selectedCells.some(
-            (cell) => cell.table_id === id && cell.row_id === rowIndex && cell.col_id === colIndex
+            (cell) => cell.table_id === id && cell.row_id === row_id && cell.col_id === col_id
         );
     };
     const columnLabels = generateColumnLabels(data[0]?.length || 0);
-    const selectEntireRow = (rowIndex: number, event: React.MouseEvent) => {
+    const selectEntireRow = (row_id: number, event: React.MouseEvent) => {
         if (!event.ctrlKey && !event.metaKey) {
             tableCtx.setSelectedCells([]);
         }
 
-        const selectedCells = data[0].map((_, colIndex) => ({
+        const selectedCells = data[0].map((_, col_id) => ({
             table_id: id,
-            row_id: rowIndex,
-            col_id: colIndex,
+            row_id: row_id,
+            col_id: col_id,
         }));
 
         selectedCells.forEach((cell) => {
@@ -61,15 +61,15 @@ const NestedTable: React.FC<NestedTableProps> = ({ id, data }) => {
         });
     };
 
-    const selectEntireColumn = (colIndex: number, event: React.MouseEvent) => {
+    const selectEntireColumn = (col_id: number, event: React.MouseEvent) => {
         if (!event.ctrlKey && !event.metaKey) {
             tableCtx.setSelectedCells([]);
         }
 
-        const selectedCells = data.map((_, rowIndex) => ({
+        const selectedCells = data.map((_, row_id) => ({
             table_id: id,
-            row_id: rowIndex,
-            col_id: colIndex,
+            row_id: row_id,
+            col_id: col_id,
         }));
 
         selectedCells.forEach((cell) => {
@@ -100,15 +100,15 @@ const NestedTable: React.FC<NestedTableProps> = ({ id, data }) => {
                         <TableHead>
                             <TableRow>
                                 <TableCell />
-                                {columnLabels.map((label, colIndex) => (
+                                {columnLabels.map((label, col_id) => (
                                     <TableCell
-                                        key={`col-header-${colIndex}`}
-                                        className={highlightCol === colIndex ? styles['highlight-col'] : ''}
+                                        key={`col-header-${col_id}`}
+                                        className={highlightCol === col_id ? styles['highlight-col'] : ''}
                                         style={{ textAlign: 'center', fontWeight: 'bold' }}
                                         onClick={(e) => {
-                                            setHighlightCol(colIndex);
+                                            setHighlightCol(col_id);
                                             setHighlightRow(null);
-                                            selectEntireColumn(colIndex, e);
+                                            selectEntireColumn(col_id, e);
                                         }}
                                     >
                                         {label}
@@ -122,30 +122,30 @@ const NestedTable: React.FC<NestedTableProps> = ({ id, data }) => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {data.map((row, rowIndex) => (
+                            {data.map((row, row_id) => (
                                 <TableRow
-                                    key={rowIndex}
-                                    className={highlightRow === rowIndex ? styles['highlight-row'] : ''}
+                                    key={row_id}
+                                    className={highlightRow === row_id ? styles['highlight-row'] : ''}
                                 >
                                     <TableCell
                                         style={{ textAlign: 'center' }}
                                         className={styles['row-number']}
                                         onClick={(e) => {
-                                            setHighlightRow(rowIndex);
+                                            setHighlightRow(row_id);
                                             setHighlightCol(null);
-                                            selectEntireRow(rowIndex, e);
+                                            selectEntireRow(row_id, e);
                                         }}
                                     >
-                                        {rowIndex + 1}
+                                        {row_id + 1}
                                     </TableCell>
-                                    {row.map((cell, colIndex) => (
+                                    {row.map((cell, col_id) => (
                                         <TableCell
-                                            key={colIndex}
+                                            key={col_id}
                                             className={
-                                                `${highlightCol === colIndex ? styles['highlight-col'] : ''} ${isSelected(rowIndex, colIndex) ? styles['selected'] : ''}`
+                                                `${highlightCol === col_id ? styles['highlight-col'] : ''} ${isSelected(row_id, col_id) ? styles['selected'] : ''}`
                                             }
                                             onClick={(e) => {
-                                                tableCtx.selectCell(id, rowIndex, colIndex, e.shiftKey, e.ctrlKey || e.metaKey);
+                                                tableCtx.selectCell(id, row_id, col_id, e.shiftKey, e.ctrlKey || e.metaKey);
                                                 setHighlightRow(null);
                                                 setHighlightCol(null);
                                             }}
@@ -154,9 +154,9 @@ const NestedTable: React.FC<NestedTableProps> = ({ id, data }) => {
                                                 fullWidth
                                                 value={cell}
                                                 onChange={(e) =>
-                                                    isSelected(rowIndex, colIndex)
+                                                    isSelected(row_id, col_id)
                                                         ? tableCtx.updateSelectedCells(e.target.value)
-                                                        : tableCtx.updateCell(id, rowIndex, colIndex, e.target.value)
+                                                        : tableCtx.updateCell(id, row_id, col_id, e.target.value)
                                                 }
                                                 variant="outlined"
                                                 size="small"
