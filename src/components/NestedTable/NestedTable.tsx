@@ -26,8 +26,8 @@ const generateColumnLabels = (numCols: number): string[] => {
 
 const NestedTable: React.FC<NestedTableProps> = ({ id, data }) => {
     const tableCtx = React.useContext(TableContext);
-    const [hoveredCol, setHoveredCol] = React.useState<number | null>(null);
-    const [hoveredRow, setHoveredRow] = React.useState<number | null>(null);
+    const [highlightCol, setHighlightCol] = React.useState<number | null>(null);
+    const [highlightRow, setHighlightRow] = React.useState<number | null>(null);
 
     const isSelected = (rowIndex: number, colIndex: number) => {
         return tableCtx.selectedCells.some(
@@ -39,7 +39,7 @@ const NestedTable: React.FC<NestedTableProps> = ({ id, data }) => {
     const columnLabels = generateColumnLabels(data[0]?.length || 0);
 
     return (
-        <div style={{ margin: '20px' }}>
+        <div style={{ margin: '20px', userSelect: 'none' }}>
             <>
                 <TableContainer component={Paper} style={{ marginTop: '20px' }}>
                     <Table>
@@ -49,8 +49,13 @@ const NestedTable: React.FC<NestedTableProps> = ({ id, data }) => {
                                 {columnLabels.map((label, colIndex) => (
                                     <TableCell
                                         key={`col-header-${colIndex}`}
-                                        className={hoveredCol === colIndex ? styles['highlight-col'] : ''}
+                                        className={highlightCol === colIndex ? styles['highlight-col'] : ''}
                                         style={{ textAlign: 'center', fontWeight: 'bold' }}
+                                        onClick={() => {
+                                            setHighlightCol(colIndex);
+                                            setHighlightRow(null);
+                                            tableCtx.updateSelectedCells('');
+                                        }}
                                     >
                                         {label}
                                     </TableCell>
@@ -67,18 +72,18 @@ const NestedTable: React.FC<NestedTableProps> = ({ id, data }) => {
                         </TableHead>
                         <TableBody>
                             {/* Column Delete Row */}
-                            <TableRow>
-                                <TableCell /> {/* Empty cell for row numbers */}
+                            {/* <TableRow>
+                                <TableCell />
                                 {data[0]?.map((_, colIndex) => (
                                     <TableCell
                                         key={`delete-col-${colIndex}`}
                                         style={{ textAlign: 'center' }}
-                                        className={hoveredCol === colIndex ? styles['highlight-col'] : ''}
+                                        className={highlightCol === colIndex ? styles['highlight-col'] : ''}
                                     >
                                         <IconButton
                                             color="error"
-                                            onMouseEnter={() => setHoveredCol(colIndex)}
-                                            onMouseLeave={() => setHoveredCol(null)}
+                                            onMouseEnter={() => setHighlightCol(colIndex)}
+                                            onMouseLeave={() => setHighlightCol(null)}
                                             onClick={() => tableCtx.deleteColumn(id, colIndex)}
                                         >
                                             <Delete />
@@ -86,18 +91,23 @@ const NestedTable: React.FC<NestedTableProps> = ({ id, data }) => {
                                     </TableCell>
                                 ))}
                                 <TableCell />
-                            </TableRow>
+                            </TableRow> */}
 
                             {/* Table Rows */}
                             {data.map((row, rowIndex) => (
                                 <TableRow
                                     key={rowIndex}
-                                    className={hoveredRow === rowIndex ? styles['highlight-row'] : ''}
+                                    className={highlightRow === rowIndex ? styles['highlight-row'] : ''}
                                 >
                                     {/* Row number */}
                                     <TableCell
                                         style={{ textAlign: 'center' }}
                                         className={styles['row-number']}
+                                        onClick={() => {
+                                            setHighlightRow(rowIndex);
+                                            setHighlightCol(null);
+                                            tableCtx.updateSelectedCells('');
+                                        }}
                                     >
                                         {rowIndex + 1}
                                     </TableCell>
@@ -105,11 +115,13 @@ const NestedTable: React.FC<NestedTableProps> = ({ id, data }) => {
                                         <TableCell
                                             key={colIndex}
                                             className={
-                                                `${hoveredCol === colIndex ? styles['highlight-col'] : ''} ${isSelected(rowIndex, colIndex) ? styles['selected'] : ''}`
+                                                `${highlightCol === colIndex ? styles['highlight-col'] : ''} ${isSelected(rowIndex, colIndex) ? styles['selected'] : ''}`
                                             }
-                                            onClick={(e) =>
+                                            onClick={(e) => {
                                                 tableCtx.selectCell(id, rowIndex, colIndex, e.shiftKey, e.ctrlKey || e.metaKey)
-                                            }
+                                                setHighlightRow(null);
+                                                setHighlightCol(null);
+                                            }}
                                         >
                                             <TextField
                                                 fullWidth
@@ -125,18 +137,18 @@ const NestedTable: React.FC<NestedTableProps> = ({ id, data }) => {
                                             />
                                         </TableCell>
                                     ))}
-                                    <TableCell
-                                        className={hoveredRow === rowIndex ? styles['highlight-row'] : ''}
+                                    {/* <TableCell
+                                        className={highlightRow === rowIndex ? styles['highlight-row'] : ''}
                                     >
                                         <IconButton
                                             color="error"
-                                            onMouseEnter={() => setHoveredRow(rowIndex)}
-                                            onMouseLeave={() => setHoveredRow(null)}
+                                            onMouseEnter={() => setHighlightRow(rowIndex)}
+                                            onMouseLeave={() => setHighlightRow(null)}
                                             onClick={() => tableCtx.deleteRow(id, rowIndex)}
                                         >
                                             <Delete />
                                         </IconButton>
-                                    </TableCell>
+                                    </TableCell> */}
                                 </TableRow>
                             ))}
                             <TableRow>
