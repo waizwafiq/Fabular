@@ -1,6 +1,16 @@
 import React from 'react';
-import { TableContainer, Table, TableBody, TableRow, TableCell, TableHead, Button, TextField, Paper, IconButton } from '@mui/material';
-import { Delete } from '@mui/icons-material';
+import {
+    TableContainer,
+    Table,
+    TableBody,
+    TableRow,
+    TableCell,
+    TableHead,
+    Button,
+    TextField,
+    Paper,
+    IconButton,
+} from '@mui/material';
 import { TableContext } from '../../contexts/table-context';
 import styles from './NestedTable.module.scss';
 
@@ -34,9 +44,53 @@ const NestedTable: React.FC<NestedTableProps> = ({ id, data }) => {
             (cell) => cell.table_id === id && cell.row_id === rowIndex && cell.col_id === colIndex
         );
     };
-
-    // Generate column labels
     const columnLabels = generateColumnLabels(data[0]?.length || 0);
+    const selectEntireRow = (rowIndex: number, event: React.MouseEvent) => {
+        if (!event.ctrlKey && !event.metaKey) {
+            tableCtx.setSelectedCells([]);
+        }
+
+        const selectedCells = data[0].map((_, colIndex) => ({
+            table_id: id,
+            row_id: rowIndex,
+            col_id: colIndex,
+        }));
+
+        selectedCells.forEach((cell) => {
+            tableCtx.selectCell(cell.table_id, cell.row_id, cell.col_id, false, true);
+        });
+    };
+
+    const selectEntireColumn = (colIndex: number, event: React.MouseEvent) => {
+        if (!event.ctrlKey && !event.metaKey) {
+            tableCtx.setSelectedCells([]);
+        }
+
+        const selectedCells = data.map((_, rowIndex) => ({
+            table_id: id,
+            row_id: rowIndex,
+            col_id: colIndex,
+        }));
+
+        selectedCells.forEach((cell) => {
+            tableCtx.selectCell(cell.table_id, cell.row_id, cell.col_id, false, true);
+        });
+    };
+
+    // Backspace and Delete key press: Delete values in selected cells
+    React.useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Backspace' || event.key === 'Delete') {
+                tableCtx.updateSelectedCells('');
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [tableCtx]);
 
     return (
         <div style={{ margin: '20px', userSelect: 'none' }}>
@@ -45,68 +99,41 @@ const NestedTable: React.FC<NestedTableProps> = ({ id, data }) => {
                     <Table>
                         <TableHead>
                             <TableRow>
-                                <TableCell /> {/* Empty cell for row numbers */}
+                                <TableCell />
                                 {columnLabels.map((label, colIndex) => (
                                     <TableCell
                                         key={`col-header-${colIndex}`}
                                         className={highlightCol === colIndex ? styles['highlight-col'] : ''}
                                         style={{ textAlign: 'center', fontWeight: 'bold' }}
-                                        onClick={() => {
+                                        onClick={(e) => {
                                             setHighlightCol(colIndex);
                                             setHighlightRow(null);
-                                            tableCtx.updateSelectedCells('');
+                                            selectEntireColumn(colIndex, e);
                                         }}
                                     >
                                         {label}
                                     </TableCell>
                                 ))}
-                                <TableCell >
-                                    <IconButton
-                                        color="primary"
-                                        onClick={() => tableCtx.addColumn(id)}
-                                    >
+                                <TableCell>
+                                    <IconButton color="primary" onClick={() => tableCtx.addColumn(id)}>
                                         +
                                     </IconButton>
-                                </TableCell> {/* Empty cell for delete column */}
+                                </TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {/* Column Delete Row */}
-                            {/* <TableRow>
-                                <TableCell />
-                                {data[0]?.map((_, colIndex) => (
-                                    <TableCell
-                                        key={`delete-col-${colIndex}`}
-                                        style={{ textAlign: 'center' }}
-                                        className={highlightCol === colIndex ? styles['highlight-col'] : ''}
-                                    >
-                                        <IconButton
-                                            color="error"
-                                            onMouseEnter={() => setHighlightCol(colIndex)}
-                                            onMouseLeave={() => setHighlightCol(null)}
-                                            onClick={() => tableCtx.deleteColumn(id, colIndex)}
-                                        >
-                                            <Delete />
-                                        </IconButton>
-                                    </TableCell>
-                                ))}
-                                <TableCell />
-                            </TableRow> */}
-
-                            {/* Table Rows */}
                             {data.map((row, rowIndex) => (
                                 <TableRow
                                     key={rowIndex}
                                     className={highlightRow === rowIndex ? styles['highlight-row'] : ''}
                                 >
-                                    {/* Row number */}
                                     <TableCell
                                         style={{ textAlign: 'center' }}
                                         className={styles['row-number']}
-                                        onClick={() => {
+                                        onClick={(e) => {
                                             setHighlightRow(rowIndex);
                                             setHighlightCol(null);
-                                            tableCtx.updateSelectedCells('');
+                                            selectEntireRow(rowIndex, e);
                                         }}
                                     >
                                         {rowIndex + 1}
@@ -118,7 +145,7 @@ const NestedTable: React.FC<NestedTableProps> = ({ id, data }) => {
                                                 `${highlightCol === colIndex ? styles['highlight-col'] : ''} ${isSelected(rowIndex, colIndex) ? styles['selected'] : ''}`
                                             }
                                             onClick={(e) => {
-                                                tableCtx.selectCell(id, rowIndex, colIndex, e.shiftKey, e.ctrlKey || e.metaKey)
+                                                tableCtx.selectCell(id, rowIndex, colIndex, e.shiftKey, e.ctrlKey || e.metaKey);
                                                 setHighlightRow(null);
                                                 setHighlightCol(null);
                                             }}
@@ -137,18 +164,6 @@ const NestedTable: React.FC<NestedTableProps> = ({ id, data }) => {
                                             />
                                         </TableCell>
                                     ))}
-                                    {/* <TableCell
-                                        className={highlightRow === rowIndex ? styles['highlight-row'] : ''}
-                                    >
-                                        <IconButton
-                                            color="error"
-                                            onMouseEnter={() => setHighlightRow(rowIndex)}
-                                            onMouseLeave={() => setHighlightRow(null)}
-                                            onClick={() => tableCtx.deleteRow(id, rowIndex)}
-                                        >
-                                            <Delete />
-                                        </IconButton>
-                                    </TableCell> */}
                                 </TableRow>
                             ))}
                             <TableRow>
