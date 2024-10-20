@@ -55,7 +55,14 @@ const NestedTable: React.FC<NestedTableProps> = ({ id, data }) => {
                                         {label}
                                     </TableCell>
                                 ))}
-                                <TableCell /> {/* Empty cell for delete column */}
+                                <TableCell >
+                                    <IconButton
+                                        color="primary"
+                                        onClick={() => tableCtx.addColumn(id)}
+                                    >
+                                        +
+                                    </IconButton>
+                                </TableCell> {/* Empty cell for delete column */}
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -132,17 +139,27 @@ const NestedTable: React.FC<NestedTableProps> = ({ id, data }) => {
                                     </TableCell>
                                 </TableRow>
                             ))}
+                            <TableRow>
+                                <div style={{ display: 'flex', justifyContent: 'flex-start', padding: '16px' }}>
+                                    <IconButton
+                                        color="primary"
+                                        onClick={() => tableCtx.addRow(id)}
+                                    >
+                                        +
+                                    </IconButton>
+                                </div>
+                            </TableRow>
                         </TableBody>
                     </Table>
                 </TableContainer>
 
-                <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-                    <Button variant="contained" color="primary" onClick={() => tableCtx.addRow(id)}>
-                        Add Row
-                    </Button>
-                    <Button variant="contained" color="primary" onClick={() => tableCtx.addColumn(id)}>
-                        Add Column
-                    </Button>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '20px' }}>
+                    <IconButton
+                        color="primary"
+                        onClick={() => tableCtx.addRow(id)}
+                    >
+                        +
+                    </IconButton>
                 </div>
             </>
         </div>
