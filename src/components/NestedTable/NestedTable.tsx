@@ -6,7 +6,6 @@ import {
     TableRow,
     TableCell,
     TableHead,
-    Button,
     TextField,
     Paper,
     IconButton,
@@ -38,12 +37,14 @@ const NestedTable: React.FC<NestedTableProps> = ({ id, data }) => {
     const tableCtx = React.useContext(TableContext);
     const [highlightCol, setHighlightCol] = React.useState<number | null>(null);
     const [highlightRow, setHighlightRow] = React.useState<number | null>(null);
+    const inputRef = React.useRef<HTMLInputElement>(null);
 
     const isSelected = (row_id: number, col_id: number) => {
         return tableCtx.selectedCells.some(
             (cell) => cell.table_id === id && cell.row_id === row_id && cell.col_id === col_id
         );
     };
+
     const columnLabels = generateColumnLabels(data[0]?.length || 0);
     const selectEntireRow = (row_id: number, event: React.MouseEvent) => {
         if (!event.ctrlKey && !event.metaKey) {
@@ -77,11 +78,33 @@ const NestedTable: React.FC<NestedTableProps> = ({ id, data }) => {
         });
     };
 
-    // Backspace and Delete key press: Delete values in selected cells
+    const moveFocus = (rowDelta: number, colDelta: number) => {
+        if (highlightRow === null || highlightCol === null) return;
+
+        const newRow = Math.max(0, Math.min(data.length - 1, highlightRow + rowDelta));
+        const newCol = Math.max(0, Math.min(columnLabels.length - 1, highlightCol + colDelta));
+
+        setHighlightRow(newRow);
+        setHighlightCol(newCol);
+    };
+
     React.useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
+            tableCtx.setSelectedCells([]);
             if (event.key === 'Backspace' || event.key === 'Delete') {
                 tableCtx.updateSelectedCells('');
+            } else if (event.key === 'ArrowUp') {
+                moveFocus(-1, 0);
+                event.preventDefault();
+            } else if (event.key === 'ArrowDown') {
+                moveFocus(1, 0);
+                event.preventDefault();
+            } else if (event.key === 'ArrowLeft') {
+                moveFocus(0, -1);
+                event.preventDefault();
+            } else if (event.key === 'ArrowRight') {
+                moveFocus(0, 1);
+                event.preventDefault();
             }
         };
 
@@ -90,7 +113,13 @@ const NestedTable: React.FC<NestedTableProps> = ({ id, data }) => {
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
         };
-    }, [tableCtx]);
+    }, [highlightRow, highlightCol, tableCtx]);
+
+    React.useEffect(() => {
+        if (highlightRow !== null && highlightCol !== null && inputRef.current) {
+            inputRef.current.focus();
+        }
+    }, [highlightRow, highlightCol]);
 
     return (
         <div style={{ margin: '20px', userSelect: 'none' }}>
@@ -146,11 +175,12 @@ const NestedTable: React.FC<NestedTableProps> = ({ id, data }) => {
                                             }
                                             onClick={(e) => {
                                                 tableCtx.selectCell(id, row_id, col_id, e.shiftKey, e.ctrlKey || e.metaKey);
-                                                setHighlightRow(null);
-                                                setHighlightCol(null);
+                                                setHighlightRow(row_id);
+                                                setHighlightCol(col_id);
                                             }}
                                         >
                                             <TextField
+                                                inputRef={highlightRow === row_id && highlightCol === col_id ? inputRef : null}
                                                 fullWidth
                                                 value={cell}
                                                 onChange={(e) =>
