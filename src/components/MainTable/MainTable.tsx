@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
     Paper,
     Typography,
@@ -26,6 +26,7 @@ const MainTable: React.FC = () => {
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
     const [M_rows, setMRows] = useState<number>(5);
     const [N_cols, setNCols] = useState<number>(5);
+    const tableRefs = useRef<{ [key: string]: (HTMLDivElement | null)[] }>({});
 
     const handleNameChange = (newName: string) => {
         setNewTableName(newName);
@@ -54,10 +55,39 @@ const MainTable: React.FC = () => {
         setNCols(5);
     };
 
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>, tableId: string, index: number) => {
+        const currentTableRefs = tableRefs.current[tableId];
+        if (!currentTableRefs) return;
+
+        if (event.key === 'ArrowDown') {
+            event.preventDefault();
+            const nextIndex = index + 1;
+            if (nextIndex < currentTableRefs.length) {
+                currentTableRefs[nextIndex]?.focus();
+            }
+        } else if (event.key === 'ArrowUp') {
+            event.preventDefault();
+            const prevIndex = index - 1;
+            if (prevIndex >= 0) {
+                currentTableRefs[prevIndex]?.focus();
+            }
+        }
+    };
+
     return (
         <Box sx={{ padding: 4 }}>
-            {tableCtx.tables.map((table) => (
-                <Paper key={table.id} sx={{ padding: 2, marginBottom: 4 }} elevation={3}>
+            {tableCtx.tables.map((table, index) => (
+                <Paper
+                    key={table.id}
+                    ref={(el) => {
+                        if (!tableRefs.current[table.id]) tableRefs.current[table.id] = [];
+                        tableRefs.current[table.id][index] = el;
+                    }}
+                    tabIndex={0}
+                    onKeyDown={(event) => handleKeyDown(event, table.id, index)}
+                    sx={{ padding: 2, marginBottom: 4 }}
+                    elevation={3}
+                >
                     <Grid container justifyContent="space-between" alignItems="center">
                         <Grid item xs={9}>
                             <Grid container alignItems="center" spacing={1}>
